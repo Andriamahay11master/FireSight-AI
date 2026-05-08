@@ -1,52 +1,58 @@
 # backend/app/services/inference_service.py
 
-import random
+from ultralytics import YOLO
+from PIL import Image
+import io
 
-# ---------------------------------------------------
-# TEMPORARY MOCK INFERENCE
-# Replace later with YOLO / TensorFlow model
-# ---------------------------------------------------
+# -----------------------------------------
+# LOAD MODEL ONCE
+# -----------------------------------------
+model = YOLO("../model/weights/best.pt")
 
+# -----------------------------------------
+# RUN INFERENCE
+# -----------------------------------------
 def run_inference(image_bytes: bytes):
-    """
-    Simulate fire/smoke detection inference.
 
-    Args:
-        image_bytes (bytes): Uploaded image bytes
+    # Convert bytes → PIL image
+    image = Image.open(io.BytesIO(image_bytes))
 
-    Returns:
-        dict: Detection results + risk level
-    """
+    # Run YOLO inference
+    results = model(image)
 
-    # -----------------------------------------
-    # MOCK DETECTIONS
-    # -----------------------------------------
-    detections = [
-        {
-            "label": "fire",
-            "confidence": round(random.uniform(0.80, 0.99), 2),
-            "bounding_box": {
-                "x": 120,
-                "y": 80,
-                "width": 200,
-                "height": 180
-            }
-        },
-        {
-            "label": "smoke",
-            "confidence": round(random.uniform(0.70, 0.95), 2),
-            "bounding_box": {
-                "x": 300,
-                "y": 150,
-                "width": 250,
-                "height": 220
-            }
-        }
-    ]
+    detections = []
 
-    # -----------------------------------------
-    # COMPUTE RISK LEVEL
-    # -----------------------------------------
+    # Process detections
+    for result in results:
+
+        boxes = result.boxes
+
+        for box in boxes:
+
+            # Coordinates
+            x1, y1, x2, y2 = box.xyxy[0].tolist()
+
+            # Confidence
+            confidence = float(box.conf[0])
+
+            # Class ID
+            class_id = int(box.cls[0])
+
+            # Label
+            label = model.names[class_id]
+
+            detections.append({
+                "label": label,
+                "confidence": round(confidence, 2),
+                "bounding_box": {
+                    "x": int(x1),
+                    "y": int(y1),
+                    "width": int(x2 - x1),
+                    "height": int(y2 - y1)
+                }
+            })
+
+    # Compute risk
     risk_level = compute_risk_level(detections)
 
     return {
@@ -55,18 +61,20 @@ def run_inference(image_bytes: bytes):
     }
 
 
-# ---------------------------------------------------
-# SIMPLE RISK ENGINE (V1)
-# ---------------------------------------------------
-
+# -----------------------------------------
+# SIMPLE RISK ENGINE
+# -----------------------------------------
 def compute_risk_level(detections):
-    """
-    Compute fire risk level based on detections.
-    """
 
-    fire_count = sum(1 for d in detections if d["label"] == "fire")
-    smoke_count = sum(1 for d in detections if d["label"] == "smoke")
+    fire_count = sum(
+        1 for d in detections if d["label"].lower() == "fire"
+    )
 
+    smoke_count = sum(
+        1 for d in detections if d["label"].lower() == "smoke"
+    )
+
+    # Basic logic
     if fire_count >= 1 and smoke_count >= 1:
         return "HIGH"
 
