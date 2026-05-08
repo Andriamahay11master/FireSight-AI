@@ -7,8 +7,7 @@ import io
 # -----------------------------------------
 # LOAD MODEL ONCE
 # -----------------------------------------
-model = YOLO("model/weights/best.pt")
-
+model = YOLO("../model/weights/best.pt")
 
 # -----------------------------------------
 # RUN INFERENCE
