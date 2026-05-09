@@ -4,11 +4,11 @@ from ultralytics import YOLO
 from PIL import Image
 import io
 from app.utils.image_processing import preprocess_image
-
+from app.core.config import settings
 # -----------------------------------------
 # LOAD MODEL ONCE
 # -----------------------------------------
-model = YOLO("../model/weights/best.pt")
+model = YOLO(settings.MODEL_WEIGHTS_PATH)
 
 # -----------------------------------------
 # RUN INFERENCE

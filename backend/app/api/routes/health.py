@@ -4,6 +4,7 @@ from fastapi import APIRouter
 from datetime import datetime
 
 from app.schemas.response_schema import HealthResponse
+from app.core.config import settings
 
 router = APIRouter()
 
@@ -18,7 +19,7 @@ def health_check():
 
     return HealthResponse(
         status="healthy",
-        service="FireSight AI API",
-        version="1.0.0",
+        service=settings.APP_NAME,
+        version=settings.APP_VERSION,
         timestamp=datetime.utcnow().isoformat()
     )

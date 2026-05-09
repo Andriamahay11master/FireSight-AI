@@ -1,14 +1,15 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from app.core.config import settings
 
 #import routes
 from app.api.routes import detection, health, alerts
 
 #app Instance
 app = FastAPI(
-    title="FireSight AI API",
-    description="API for Fire & Smoke Detection with Risk Analysis",
-    version="1.0.0",
+    title=settings.APP_NAME,
+    description=settings.APP_DESCRIPTION,
+    version=settings.APP_VERSION,
 )
 
 # -----------------------------
@@ -17,7 +18,7 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
-    allow_origins=["*"],  # Allow all origins (for development)
+    allow_origins=settings.ALLOWED_ORIGINS,
     allow_methods=["*"],  # Allow all HTTP methods
     allow_headers=["*"],  # Allow all headers
 )
