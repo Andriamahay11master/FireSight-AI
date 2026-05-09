@@ -3,6 +3,7 @@
 from ultralytics import YOLO
 from PIL import Image
 import io
+from app.utils.image_processing import preprocess_image
 
 # -----------------------------------------
 # LOAD MODEL ONCE
@@ -15,7 +16,7 @@ model = YOLO("../model/weights/best.pt")
 def run_inference(image_bytes: bytes):
 
     # Convert bytes → PIL image
-    image = Image.open(io.BytesIO(image_bytes))
+    image = preprocess_image(image_bytes)
 
     # Run YOLO inference
     results = model(image)
