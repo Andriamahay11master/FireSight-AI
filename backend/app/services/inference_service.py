@@ -5,6 +5,7 @@ from PIL import Image
 import io
 from app.utils.image_processing import preprocess_image
 from app.core.config import settings
+from app.services.risk_engine import compute_risk_level
 # -----------------------------------------
 # LOAD MODEL ONCE
 # -----------------------------------------
@@ -53,33 +54,9 @@ def run_inference(image_bytes: bytes):
                 }
             })
 
-    # Compute risk
     risk_level = compute_risk_level(detections)
 
     return {
         "detections": detections,
         "risk_level": risk_level
     }
-
-
-# -----------------------------------------
-# SIMPLE RISK ENGINE
-# -----------------------------------------
-def compute_risk_level(detections):
-
-    fire_count = sum(
-        1 for d in detections if d["label"].lower() == "fire"
-    )
-
-    smoke_count = sum(
-        1 for d in detections if d["label"].lower() == "smoke"
-    )
-
-    # Basic logic
-    if fire_count >= 1 and smoke_count >= 1:
-        return "HIGH"
-
-    elif fire_count >= 1:
-        return "MEDIUM"
-
-    return "LOW"
