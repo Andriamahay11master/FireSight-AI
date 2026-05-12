@@ -4,6 +4,9 @@ from fastapi import APIRouter, UploadFile, File
 from app.services.inference_service import run_inference
 
 from app.schemas.detection_schema import DetectionResponse
+from app.core.logger import get_logger
+
+logger = get_logger(__name__)
 
 router = APIRouter()
 
@@ -16,6 +19,8 @@ async def detect_fire(file: UploadFile = File(...)):
     Upload an image and get fire/smoke detection results.
     """
 
+    logger.info(f"Received image file: {file.filename}")
+    
     # Step 1: Read image bytes
     image_bytes = await file.read()
 

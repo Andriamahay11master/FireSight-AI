@@ -6,6 +6,12 @@ import io
 from app.utils.image_processing import preprocess_image
 from app.core.config import settings
 from app.services.risk_engine import compute_risk_level
+from app.core.logger import get_logger
+
+logger = get_logger(__name__)
+
+logger.info("Loading YOLO model...")
+
 # -----------------------------------------
 # LOAD MODEL ONCE
 # -----------------------------------------
